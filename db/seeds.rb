@@ -1,7 +1,10 @@
 # Deterministic demo data. Re-running resets every record below to these values.
 
+users = {}
+
 [ "Sam", "Kim" ].each do |name|
-  User.find_or_initialize_by(name: "#{name} (Support Engineer)").update!(role: :support_engineer)
+  users[name] = User.find_or_initialize_by(name: "#{name} (Support Engineer)")
+  users[name].update!(role: :support_engineer)
 end
 
 amazon = Tenant.find_or_create_by!(name: "Amazon")
@@ -29,8 +32,24 @@ end
   [ "Erin", dpd, "Cologne", [ "CGN-1" ] ]
 ].each do |first_name, tenant, team_name, locker_names|
   team = Team.find_or_create_by!(tenant:, name: team_name)
-  User.find_or_initialize_by(name: "#{first_name} (#{tenant.name} · #{team_name})").update!(role: :employee, team:)
+  users[first_name] = User.find_or_initialize_by(name: "#{first_name} (#{tenant.name} · #{team_name})")
+  users[first_name].update!(role: :employee, team:)
   locker_names.each do |name|
     LockerAssignment.find_or_create_by!(team:, locker: Locker.find_by!(tenant:, name:))
   end
+end
+
+# Locker Actions, oldest first, one hour apart. Each Locker's kinds alternate and end in its Locker State above.
+# Inserted directly because the open/close check compares against the Locker's current, final State.
+LockerAction.delete_all
+history = [
+  [ "BER-1", "Alice" ], [ "HAM-1", "Dave" ], [ "BER-2", "Alice" ], [ "BER-1", "Bob" ], [ "MUC-1", "Carol" ],
+  [ "HAM-3", "Sam" ], [ "CGN-1", "Erin" ], [ "BER-3", "Bob" ], [ "HAM-2", "Dave" ], [ "BER-1", "Sam" ],
+  [ "HAM-1", "Kim" ], [ "BER-2", "Alice" ], [ "CGN-1", "Erin" ], [ "HAM-3", "Kim" ], [ "BER-1", "Alice" ]
+]
+history.each_with_index do |(locker_name, user_name), index|
+  locker = Locker.find_by!(name: locker_name)
+  later = history.drop(index + 1).count { |name, _| name == locker_name }
+  kind = locker.open? == later.even? ? "open" : "close"
+  LockerAction.insert!({ locker_id: locker.id, user_id: users.fetch(user_name).id, kind:, created_at: (history.size - index).hours.ago })
 end

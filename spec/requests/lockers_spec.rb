@@ -53,7 +53,7 @@ RSpec.describe "Lockers", type: :request do
 
       it "hides the Tenant column" do
         assert_select "th", text: "Tenant", count: 0
-        assert_select "tbody tr:first-child td", count: 3
+        assert_select "td", text: amazon.name, count: 0
       end
     end
 

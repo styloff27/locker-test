@@ -27,9 +27,9 @@ end
   [ "Carol", amazon, "Munich", [ "MUC-1" ] ],
   [ "Dave", dpd, "Hamburg", [ "HAM-1", "HAM-2" ] ],
   [ "Erin", dpd, "Cologne", [ "CGN-1" ] ]
-].each do |employee, tenant, team_name, locker_names|
+].each do |first_name, tenant, team_name, locker_names|
   team = Team.find_or_create_by!(tenant:, name: team_name)
-  User.find_or_initialize_by(name: "#{employee} (#{tenant.name} · #{team_name})").update!(role: :employee, team:)
+  User.find_or_initialize_by(name: "#{first_name} (#{tenant.name} · #{team_name})").update!(role: :employee, team:)
   locker_names.each do |name|
     LockerAssignment.find_or_create_by!(team:, locker: Locker.find_by!(tenant:, name:))
   end

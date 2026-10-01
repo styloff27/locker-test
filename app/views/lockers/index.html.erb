@@ -15,7 +15,7 @@
     <tbody>
       <% @lockers.each do |locker| %>
         <tr>
-          <td><%= locker.name %></td>
+          <td><%= link_to locker.name, locker %></td>
           <td><%= locker.location %></td>
           <td><%= locker.state.humanize %></td>
           <% if Current.user.support_engineer? %>

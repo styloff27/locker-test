@@ -57,12 +57,100 @@ RSpec.describe "Lockers", type: :request do
       end
     end
 
+    it "links each Locker to its Locker page" do
+      locker = create(:locker, name: "BER-1")
+      switch_to create(:user, :support_engineer)
+
+      get root_path
+
+      assert_select "tbody a[href=?]", locker_path(locker), text: "BER-1"
+    end
+
     it "shows an empty-state message when there are no Lockers" do
       switch_to create(:user, :support_engineer)
 
       get root_path
 
       assert_select "p", text: "No lockers to show."
+    end
+  end
+
+  describe "GET /lockers/:id" do
+    let(:amazon) { create(:tenant, name: "Amazon") }
+    let(:morning) { create(:team, tenant: amazon, name: "Morning Shift") }
+    let(:night) { create(:team, tenant: amazon, name: "Night Shift") }
+    let(:shared) { create(:locker, tenant: amazon, name: "BER-1", location: "Berlin Ostbahnhof", state: :open) }
+
+    before do
+      create(:locker_assignment, team: morning, locker: shared)
+      create(:locker_assignment, team: night, locker: shared)
+    end
+
+    it "shows the Locker's name, location, state, Tenant and assigned Teams" do
+      switch_to create(:user, :support_engineer)
+
+      get locker_path(shared)
+
+      expect(response).to have_http_status(:ok)
+      assert_select "h1", text: "BER-1"
+      details = css_select("dl dt").map(&:text).zip(css_select("dl dd").map(&:text)).to_h
+      expect(details).to eq(
+        "Location" => "Berlin Ostbahnhof",
+        "State" => "Open",
+        "Tenant" => "Amazon",
+        "Teams" => "Morning Shift, Night Shift"
+      )
+    end
+
+    context "as an Employee" do
+      before { switch_to create(:user, team: morning) }
+
+      it "answers 200 for their Team's Lockers, including a shared one" do
+        own = create(:locker_assignment, team: morning).locker
+
+        [ shared, own ].each do |locker|
+          get locker_path(locker)
+
+          expect(response).to have_http_status(:ok)
+        end
+      end
+
+      context "with the error pages a real user gets" do
+        around do |example|
+          env_config = Rails.application.env_config
+          detailed = env_config["action_dispatch.show_detailed_exceptions"]
+          env_config["action_dispatch.show_detailed_exceptions"] = false
+          example.run
+        ensure
+          env_config["action_dispatch.show_detailed_exceptions"] = detailed
+        end
+
+        it "answers the same 404 for another Tenant's, another Team's, an unassigned and a missing Locker" do
+          other_tenants = create(:locker_assignment).locker
+          other_teams = create(:locker_assignment, team: night).locker
+          unassigned = create(:locker, tenant: amazon)
+          get locker_path(0)
+          expect(response).to have_http_status(:not_found)
+          missing = response.body
+
+          [ other_tenants, other_teams, unassigned ].each do |locker|
+            get locker_path(locker)
+
+            expect(response).to have_http_status(:not_found)
+            expect(response.body).to eq missing
+          end
+        end
+      end
+    end
+
+    it "answers 200 to a Support Engineer for any Locker, assigned or not" do
+      switch_to create(:user, :support_engineer)
+
+      [ shared, create(:locker_assignment).locker, create(:locker) ].each do |locker|
+        get locker_path(locker)
+
+        expect(response).to have_http_status(:ok)
+      end
     end
   end
 end

@@ -1,6 +1,7 @@
 class Locker < ApplicationRecord
   belongs_to :tenant
   has_many :locker_assignments
+  has_many :teams, through: :locker_assignments
 
   enum :state, { open: "open", closed: "closed" }, validate: true
 

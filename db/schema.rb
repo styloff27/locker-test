@@ -10,7 +10,18 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_01_165030) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_01_185042) do
+  create_table "locker_actions", force: :cascade do |t|
+    t.integer "locker_id", null: false
+    t.integer "user_id", null: false
+    t.string "kind", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["locker_id"], name: "index_locker_actions_on_locker_id"
+    t.index ["user_id"], name: "index_locker_actions_on_user_id"
+    t.check_constraint "kind IN ('open', 'close')", name: "locker_actions_kind_check"
+  end
+
   create_table "locker_assignments", force: :cascade do |t|
     t.integer "team_id", null: false
     t.integer "locker_id", null: false
@@ -59,6 +70,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_01_165030) do
     t.check_constraint "role IN ('employee', 'support_engineer')", name: "users_role_check"
   end
 
+  add_foreign_key "locker_actions", "lockers"
+  add_foreign_key "locker_actions", "users"
   add_foreign_key "locker_assignments", "lockers", column: ["locker_id", "tenant_id"], primary_key: ["id", "tenant_id"]
   add_foreign_key "locker_assignments", "teams", column: ["team_id", "tenant_id"], primary_key: ["id", "tenant_id"]
   add_foreign_key "lockers", "tenants"

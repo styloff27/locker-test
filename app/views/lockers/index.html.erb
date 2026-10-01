@@ -10,6 +10,7 @@
         <% if Current.user.support_engineer? %>
           <th>Tenant</th>
         <% end %>
+        <th>Action</th>
       </tr>
     </thead>
     <tbody>
@@ -21,6 +22,7 @@
           <% if Current.user.support_engineer? %>
             <td><%= locker.tenant.name %></td>
           <% end %>
+          <td><%= render "locker_actions/button", locker: %></td>
         </tr>
       <% end %>
     </tbody>

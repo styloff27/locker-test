@@ -2,7 +2,7 @@ require "rails_helper"
 
 RSpec.describe "Lockers", type: :request do
   describe "GET /" do
-    it "shows a Support Engineer every Locker, assigned or not, by name with its location, state and Tenant" do
+    it "shows a Support Engineer every Locker, assigned or not, by name with its location, state, Tenant and action" do
       amazon = create(:tenant, name: "Amazon")
       dpd = create(:tenant, name: "DPD")
       create(:locker, tenant: dpd, name: "HAM-1", location: "Hamburg Hbf", state: :open)
@@ -12,10 +12,10 @@ RSpec.describe "Lockers", type: :request do
       get root_path
 
       expect(response).to have_http_status(:ok)
-      rows = css_select("tbody tr").map { |row| row.css("td").map(&:text) }
+      rows = css_select("tbody tr").map { |row| row.css("td").map { |cell| cell.text.strip } }
       expect(rows).to eq [
-        [ "BER-1", "Berlin Ostbahnhof", "Closed", "Amazon" ],
-        [ "HAM-1", "Hamburg Hbf", "Open", "DPD" ]
+        [ "BER-1", "Berlin Ostbahnhof", "Closed", "Amazon", "Open" ],
+        [ "HAM-1", "Hamburg Hbf", "Open", "DPD", "Close" ]
       ]
     end
 
@@ -64,6 +64,17 @@ RSpec.describe "Lockers", type: :request do
       get root_path
 
       assert_select "tbody a[href=?]", locker_path(locker), text: "BER-1"
+    end
+
+    it "offers only Open for a Closed Locker and only Close for an Open one" do
+      closed = create(:locker, state: :closed)
+      opened = create(:locker, state: :open)
+      switch_to create(:user, :support_engineer)
+
+      get root_path
+
+      assert_only_action closed, "open", "Open"
+      assert_only_action opened, "close", "Close"
     end
 
     it "shows an empty-state message when there are no Lockers" do
@@ -143,6 +154,17 @@ RSpec.describe "Lockers", type: :request do
       end
     end
 
+    it "offers only the action that fits the Locker State" do
+      switch_to create(:user, :support_engineer)
+
+      get locker_path(shared)
+      assert_only_action shared, "close", "Close"
+
+      shared.update!(state: :closed)
+      get locker_path(shared)
+      assert_only_action shared, "open", "Open"
+    end
+
     it "answers 200 to a Support Engineer for any Locker, assigned or not" do
       switch_to create(:user, :support_engineer)
 
@@ -151,6 +173,13 @@ RSpec.describe "Lockers", type: :request do
 
         expect(response).to have_http_status(:ok)
       end
+    end
+  end
+
+  def assert_only_action(locker, kind, label)
+    assert_select "form[action=?]", locker_locker_actions_path(locker), count: 1 do
+      assert_select "input[name=kind][value=?]", kind
+      assert_select "button", text: label
     end
   end
 end

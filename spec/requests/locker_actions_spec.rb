@@ -19,7 +19,7 @@ RSpec.describe "Locker Actions", type: :request do
       expect(LockerAction.last).to have_attributes(locker:, user: employee, kind: "open")
       expect(response).to redirect_to(locker_url(locker))
       follow_redirect!
-      assert_select "[role=status]", text: "BER-1 opened."
+      assert_select "[role=status]", text: "BER-1 is now open."
     end
 
     it "closes an Open Locker and redirects to the Locker page without a referrer" do
@@ -31,7 +31,7 @@ RSpec.describe "Locker Actions", type: :request do
       expect(LockerAction.last).to have_attributes(locker:, user: employee, kind: "close")
       expect(response).to redirect_to(locker_path(locker))
       follow_redirect!
-      assert_select "[role=status]", text: "BER-1 closed."
+      assert_select "[role=status]", text: "BER-1 is now closed."
     end
 
     [ [ :open, "open", "BER-1 is already open." ], [ :closed, "close", "BER-1 is already closed." ] ].each do |state, kind, alert|

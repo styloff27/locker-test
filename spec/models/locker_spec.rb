@@ -14,7 +14,7 @@ RSpec.describe Locker do
     expect { locker.update_column(:state, "maintenance") }.to raise_error(ActiveRecord::StatementInvalid, /CHECK/)
   end
 
-  it "lets only the first of two concurrent opens through, because the row lock re-reads the Locker State" do
+  it "rejects an open through a stale Locker, because the lock re-reads the Locker State" do
     locker = create(:locker, state: :closed)
     user = create(:user, :support_engineer)
     first, second = Locker.find(locker.id), Locker.find(locker.id)

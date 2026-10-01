@@ -4,7 +4,7 @@ class LockerActionsController < ApplicationController
     locker_action = locker.operate(params[:kind], Current.user)
 
     if locker_action.persisted?
-      redirect_back_or_to locker, status: :see_other, notice: "#{locker.name} #{locker_action.open? ? "opened" : "closed"}."
+      redirect_back_or_to locker, status: :see_other, notice: "#{locker.name} is now #{locker.state}."
     else
       redirect_back_or_to locker, status: :see_other, alert: locker_action.errors.full_messages.to_sentence
     end

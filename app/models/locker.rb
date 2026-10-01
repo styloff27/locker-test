@@ -15,7 +15,8 @@ class Locker < ApplicationRecord
     end
   }
 
-  # Opens or closes the Locker. The row lock makes the State check, State change and Locker Action atomic.
+  # Opens or closes the Locker. with_lock re-reads the Locker inside a write transaction (SQLite takes the
+  # database write lock), so the State check, State change and Locker Action are atomic.
   def operate(kind, user)
     with_lock do
       locker_actions.create(kind:, user:).tap do |locker_action|

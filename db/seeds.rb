@@ -19,3 +19,18 @@ dpd = Tenant.find_or_create_by!(name: "DPD")
 ].each do |tenant, name, location, state|
   Locker.find_or_initialize_by(tenant:, name:).update!(location:, state:)
 end
+
+# One Employee per Team. Berlin Morning and Berlin Night share BER-1, and HAM-3 stays unassigned.
+[
+  [ "Alice", amazon, "Berlin Morning", [ "BER-1", "BER-2" ] ],
+  [ "Bob", amazon, "Berlin Night", [ "BER-1", "BER-3" ] ],
+  [ "Carol", amazon, "Munich", [ "MUC-1" ] ],
+  [ "Dave", dpd, "Hamburg", [ "HAM-1", "HAM-2" ] ],
+  [ "Erin", dpd, "Cologne", [ "CGN-1" ] ]
+].each do |employee, tenant, team_name, locker_names|
+  team = Team.find_or_create_by!(tenant:, name: team_name)
+  User.find_or_initialize_by(name: "#{employee} (#{tenant.name} · #{team_name})").update!(role: :employee, team:)
+  locker_names.each do |name|
+    LockerAssignment.find_or_create_by!(team:, locker: Locker.find_by!(tenant:, name:))
+  end
+end

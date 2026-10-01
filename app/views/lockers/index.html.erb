@@ -7,7 +7,9 @@
         <th>Name</th>
         <th>Location</th>
         <th>State</th>
-        <th>Tenant</th>
+        <% if Current.user.support_engineer? %>
+          <th>Tenant</th>
+        <% end %>
       </tr>
     </thead>
     <tbody>
@@ -16,7 +18,9 @@
           <td><%= locker.name %></td>
           <td><%= locker.location %></td>
           <td><%= locker.state.humanize %></td>
-          <td><%= locker.tenant.name %></td>
+          <% if Current.user.support_engineer? %>
+            <td><%= locker.tenant.name %></td>
+          <% end %>
         </tr>
       <% end %>
     </tbody>

@@ -36,11 +36,9 @@ module LockerPlatform
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
 
-    # Don't generate system test files.
-    config.generators.system_tests = nil
-
-    # Behaviour is tested through request specs, so skip view and helper specs.
+    # Behaviour is tested through request specs, so skip system, view and helper specs.
     config.generators do |g|
+      g.system_tests nil
       g.view_specs false
       g.helper_specs false
     end

@@ -10,7 +10,7 @@ A Rails 8 app (Ruby 3.2.6, SQLite) built from the brief, [eLocker_Test_Assignmen
 
 - **Setup:** `bin/setup` installs gems, prepares the database and starts the server. Add `--skip-server` to only set up.
 - **Run:** `bin/dev`, then open http://localhost:3000.
-- **Test:** `bundle exec rspec`, or `bundle exec rspec spec/requests/home_spec.rb` for one file.
+- **Test:** `bundle exec rspec`, or `bundle exec rspec spec/requests/pages_spec.rb` for one file.
 - **Seed:** `bin/rails db:seed`. `bin/rails db:reset` drops, recreates and re-seeds.
 - **Lint:** `bin/rubocop`.
 

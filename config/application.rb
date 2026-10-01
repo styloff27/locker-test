@@ -38,5 +38,11 @@ module LockerPlatform
 
     # Don't generate system test files.
     config.generators.system_tests = nil
+
+    # Behaviour is tested through request specs, so skip view and helper specs.
+    config.generators do |g|
+      g.view_specs false
+      g.helper_specs false
+    end
   end
 end

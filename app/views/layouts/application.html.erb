@@ -27,6 +27,15 @@
         <ul>
           <li><strong><%= link_to "eLocker", root_path %></strong></li>
         </ul>
+        <ul>
+          <li>
+            <%= form_with url: session_path, method: :patch do |form| %>
+              <%= form.label :user_id, "Acting as" %>
+              <%= form.select :user_id, options_from_collection_for_select(User.order(:id), :id, :name, Current.user&.id),
+                    {}, onchange: "this.form.requestSubmit()" %>
+            <% end %>
+          </li>
+        </ul>
       </nav>
     </header>
 

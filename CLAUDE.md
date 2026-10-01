@@ -32,8 +32,11 @@ A test assignment: a multi-tenant smart-locker platform in Ruby on Rails, with a
 
 ## Code conventions
 
-- Follow the Rails way and Ruby conventions: Rails defaults and generators, RESTful resources, standard naming and directory layout. Avoid custom patterns when Rails already provides one.
-- Tests use RSpec, with FactoryBot for test data and Faker for values. Do not use Minitest or fixtures.
+- Follow the Rails way and Ruby conventions: Rails generators, RESTful resources, standard naming and directory layout. Use what Rails already provides before writing a custom pattern.
+- **YAGNI:** the repo holds only what the app uses today. Unused frameworks (Active Storage, Action Mailer, Action Mailbox, Action Text), Solid Cache/Queue/Cable, Stimulus, jbuilder and the PWA files were removed on purpose. Add a gem, framework or file back only when a ticket needs it, and delete generator output the change doesn't use.
+- **KISS:** pick the simplest thing that works, such as a scope, a model method or a partial, before a service object, concern or extra gem.
+- **DRY:** keep each rule in one place. For example, Accessible Lockers is one scope that every query goes through.
+- Tests use RSpec, with FactoryBot for test data and Faker for values. Do not use Minitest or fixtures. Specs run in random order.
 
 ## How to work
 

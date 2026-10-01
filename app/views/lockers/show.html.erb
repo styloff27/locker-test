@@ -10,5 +10,5 @@
   <dt>Tenant</dt>
   <dd><%= @locker.tenant.name %></dd>
   <dt>Teams</dt>
-  <dd><%= @locker.teams.order(:name).pluck(:name).join(", ").presence || "None" %></dd>
+  <dd><%= @team_names.join(", ").presence || "None" %></dd>
 </dl>

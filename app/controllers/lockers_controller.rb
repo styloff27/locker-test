@@ -5,5 +5,6 @@ class LockersController < ApplicationController
 
   def show
     @locker = Locker.accessible_by(Current.user).find(params[:id])
+    @team_names = @locker.teams.order(:name).pluck(:name)
   end
 end

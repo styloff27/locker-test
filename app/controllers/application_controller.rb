@@ -9,6 +9,10 @@ class ApplicationController < ActionController::Base
 
   private
 
+  def accessible_lockers
+    Locker.accessible_by(Current.user)
+  end
+
   def set_current_user
     Current.user = User.find_by(id: session[:user_id]) || User.first
   end

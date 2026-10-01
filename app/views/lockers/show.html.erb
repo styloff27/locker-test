@@ -12,3 +12,5 @@
   <dt>Teams</dt>
   <dd><%= @team_names.join(", ").presence || "None" %></dd>
 </dl>
+
+<%= render "locker_actions/button", locker: @locker %>

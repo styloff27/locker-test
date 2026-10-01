@@ -36,6 +36,9 @@ module LockerPlatform
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
 
+    # db/structure.sql, because schema.rb can't hold the Tenant-consistency trigger on locker_actions (ADR 0002).
+    config.active_record.schema_format = :sql
+
     # Behaviour is tested through request specs, so skip system, view and helper specs.
     config.generators do |g|
       g.system_tests nil

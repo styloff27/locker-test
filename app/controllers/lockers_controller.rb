@@ -7,10 +7,4 @@ class LockersController < ApplicationController
     @locker = accessible_lockers.find(params[:id])
     @team_names = @locker.teams.order(:name).pluck(:name)
   end
-
-  private
-
-  def accessible_lockers
-    Locker.accessible_by(Current.user)
-  end
 end

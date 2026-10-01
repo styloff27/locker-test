@@ -14,3 +14,7 @@
 </dl>
 
 <%= render "locker_actions/button", locker: @locker %>
+
+<h2>History</h2>
+
+<%= render "locker_actions/log", locker_actions: @locker_actions, pagy: @pagy %>

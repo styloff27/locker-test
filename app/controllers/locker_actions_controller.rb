@@ -6,7 +6,7 @@ class LockerActionsController < ApplicationController
     if locker_action.persisted?
       redirect_back_or_to locker, status: :see_other, notice: "#{locker.name} is now #{locker.state}."
     else
-      redirect_back_or_to locker, status: :see_other, alert: locker_action.errors.full_messages.to_sentence
+      redirect_back_or_to locker, status: :see_other, alert: locker_action.errors.map(&:message).to_sentence
     end
   end
 end

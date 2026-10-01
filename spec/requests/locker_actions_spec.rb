@@ -60,7 +60,7 @@ RSpec.describe "Locker Actions", type: :request do
 
         expect(locker.reload.state).to eq state.to_s
         follow_redirect!
-        assert_select "[role=alert]", text: "Kind is not included in the list"
+        assert_select "[role=alert]", text: "This action is not included"
       end
     end
 

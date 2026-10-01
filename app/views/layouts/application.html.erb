@@ -18,12 +18,30 @@
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
     <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
   <body>
-    <%= yield %>
+    <header class="container">
+      <nav>
+        <ul>
+          <li><strong><%= link_to "eLocker", root_path %></strong></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main class="container">
+      <% if notice %>
+        <article role="status"><%= notice %></article>
+      <% end %>
+      <% if alert %>
+        <article role="alert"><%= alert %></article>
+      <% end %>
+
+      <%= yield %>
+    </main>
   </body>
 </html>

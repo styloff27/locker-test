@@ -1,0 +1,26 @@
+<h1>Lockers</h1>
+
+<% if @lockers.any? %>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Location</th>
+        <th>State</th>
+        <th>Tenant</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @lockers.each do |locker| %>
+        <tr>
+          <td><%= locker.name %></td>
+          <td><%= locker.location %></td>
+          <td><%= locker.state.humanize %></td>
+          <td><%= locker.tenant.name %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p>No lockers to show.</p>
+<% end %>

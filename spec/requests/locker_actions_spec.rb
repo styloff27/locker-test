@@ -202,15 +202,19 @@ RSpec.describe "Locker Actions", type: :request do
         expect(log_rows.map(&:first)).to eq [ "October 01, 2026 00:00" ]
       end
 
-      it "shows the empty state past the last page and answers bad request for a page below 1" do
+      it "shows the empty state past the last page" do
         get locker_actions_path(page: 3)
 
         expect(response).to have_http_status(:ok)
         assert_select "p", text: "No locker actions to show."
+      end
 
-        get locker_actions_path(page: 0)
+      it "redirects a page below 1 or not a number to page 1" do
+        [ "0", "-1", "abc" ].each do |page|
+          get locker_actions_path(page:)
 
-        expect(response).to have_http_status(:bad_request)
+          expect(response).to redirect_to(locker_actions_path)
+        end
       end
     end
   end

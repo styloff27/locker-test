@@ -206,6 +206,9 @@ RSpec.describe "Lockers", type: :request do
 
         get locker_path(shared, page: 2)
         expect(log_rows).to eq [ [ "October 01, 2026 10:00", "BER-1", "Close", "Alice" ] ]
+
+        get locker_path(shared, page: 0)
+        expect(response).to redirect_to(locker_path(shared))
       end
     end
 

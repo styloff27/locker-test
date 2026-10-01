@@ -9,6 +9,9 @@ class ApplicationController < ActionController::Base
 
   before_action :set_current_user
 
+  # A page below 1 or not a number goes to page 1. A page past the last renders empty (pagy's overflow extra).
+  rescue_from(Pagy::VariableError) { redirect_to request.path }
+
   private
 
   def accessible_lockers

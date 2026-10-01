@@ -165,6 +165,61 @@ RSpec.describe "Lockers", type: :request do
       assert_only_action shared, "open", "Open"
     end
 
+    context "with history" do
+      let(:alice) { create(:user, name: "Alice", team: morning) }
+      let(:bob) { create(:user, name: "Bob", team: night) }
+      let(:sam) { create(:user, :support_engineer, name: "Sam") }
+
+      before do
+        act(shared, bob, "close", 11)
+        act(shared, sam, "close", 12)
+        act(create(:locker_assignment, team: morning).locker, alice, "open", 13)
+        act(shared, alice, "close", 10)
+      end
+
+      it "shows an Employee only this Locker's Locker Actions, newest first, with Support Engineers as eLocker Support" do
+        switch_to alice
+
+        get locker_path(shared)
+
+        expect(log_rows).to eq [
+          [ "October 01, 2026 12:00", "BER-1", "Close", "eLocker Support" ],
+          [ "October 01, 2026 11:00", "BER-1", "Close", "Bob" ],
+          [ "October 01, 2026 10:00", "BER-1", "Close", "Alice" ]
+        ]
+      end
+
+      it "shows a Support Engineer real names and the Tenant" do
+        switch_to sam
+
+        get locker_path(shared)
+
+        expect(log_rows.map { |row| row.values_at(2, 4) }).to eq [ [ "Amazon", "Sam" ], [ "Amazon", "Bob" ], [ "Amazon", "Alice" ] ]
+      end
+
+      it "shows 25 per page" do
+        23.times { |hour| act(shared, alice, "close", 14 + hour) }
+        switch_to alice
+
+        get locker_path(shared)
+        expect(log_rows.size).to eq 25
+
+        get locker_path(shared, page: 2)
+        expect(log_rows).to eq [ [ "October 01, 2026 10:00", "BER-1", "Close", "Alice" ] ]
+
+        get locker_path(shared, page: 0)
+        expect(response).to redirect_to(locker_path(shared))
+      end
+    end
+
+    it "shows an empty-state message when the Locker has no history" do
+      switch_to create(:user, :support_engineer)
+
+      get locker_path(shared)
+
+      assert_select "p", text: "No locker actions to show."
+    end
+
     it "answers 200 to a Support Engineer for any Locker, assigned or not" do
       switch_to create(:user, :support_engineer)
 

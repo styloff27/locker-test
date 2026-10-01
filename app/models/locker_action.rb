@@ -6,6 +6,8 @@ class LockerAction < ApplicationRecord
 
   validate :changes_locker_state, on: :create
 
+  scope :newest_first, -> { order(created_at: :desc, id: :desc) }
+
   # The Locker State this Locker Action leaves its Locker in, nil for an unknown kind.
   def resulting_state
     { "open" => "open", "close" => "closed" }[kind]

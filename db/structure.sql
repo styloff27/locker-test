@@ -34,7 +34,6 @@ FOREIGN KEY ("locker_id")
 FOREIGN KEY ("user_id")
   REFERENCES "users" ("id")
 , CONSTRAINT locker_actions_kind_check CHECK (kind IN ('open', 'close')));
-CREATE INDEX "index_locker_actions_on_locker_id" ON "locker_actions" ("locker_id") /*application='LockerPlatform'*/;
 CREATE INDEX "index_locker_actions_on_user_id" ON "locker_actions" ("user_id") /*application='LockerPlatform'*/;
 CREATE TRIGGER locker_actions_tenant_check
 BEFORE INSERT ON locker_actions
@@ -48,7 +47,9 @@ WHEN EXISTS (
 BEGIN
   SELECT RAISE(ABORT, 'Locker Action: the Locker and the Employee belong to different tenants');
 END;
+CREATE INDEX "index_locker_actions_on_locker_id_and_created_at_and_id" ON "locker_actions" ("locker_id", "created_at", "id") /*application='LockerPlatform'*/;
 INSERT INTO "schema_migrations" (version) VALUES
+('20261001194923'),
 ('20261001191651'),
 ('20261001185042'),
 ('20261001165030'),

@@ -1,4 +1,6 @@
 class ApplicationController < ActionController::Base
+  include Pagy::Backend
+
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   allow_browser versions: :modern
 
@@ -6,6 +8,9 @@ class ApplicationController < ActionController::Base
   stale_when_importmap_changes
 
   before_action :set_current_user
+
+  # A page below 1 or not a number goes to page 1. A page past the last renders empty (pagy's overflow extra).
+  rescue_from(Pagy::VariableError) { redirect_to request.path }
 
   private
 

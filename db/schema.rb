@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_01_161652) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_01_164306) do
   create_table "lockers", force: :cascade do |t|
     t.integer "tenant_id", null: false
     t.string "name", null: false
@@ -19,6 +19,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_01_161652) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["tenant_id"], name: "index_lockers_on_tenant_id"
+    t.check_constraint "state IN ('open', 'closed')", name: "lockers_state_check"
   end
 
   create_table "tenants", force: :cascade do |t|
@@ -32,6 +33,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_01_161652) do
     t.string "role", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.check_constraint "role IN ('employee', 'support_engineer')", name: "users_role_check"
   end
 
   add_foreign_key "lockers", "tenants"

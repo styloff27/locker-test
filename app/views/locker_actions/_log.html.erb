@@ -1,0 +1,32 @@
+<% if locker_actions.any? %>
+  <table>
+    <thead>
+      <tr>
+        <th>When</th>
+        <th>Locker</th>
+        <% if Current.user.support_engineer? %>
+          <th>Tenant</th>
+        <% end %>
+        <th>Action</th>
+        <th>By</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% locker_actions.each do |locker_action| %>
+        <tr>
+          <td><%= time_tag locker_action.created_at, l(locker_action.created_at, format: :long) %></td>
+          <td><%= link_to locker_action.locker.name, locker_action.locker %></td>
+          <% if Current.user.support_engineer? %>
+            <td><%= locker_action.locker.tenant.name %></td>
+          <% end %>
+          <td><%= locker_action.kind.humanize %></td>
+          <td><%= actor_name(locker_action) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p>No locker actions to show.</p>
+<% end %>
+
+<%== pagy_nav(pagy) if pagy.pages > 1 %>

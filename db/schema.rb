@@ -10,7 +10,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_01_164306) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_01_165030) do
+  create_table "locker_assignments", force: :cascade do |t|
+    t.integer "team_id", null: false
+    t.integer "locker_id", null: false
+    t.integer "tenant_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["locker_id"], name: "index_locker_assignments_on_locker_id"
+    t.index ["team_id", "locker_id"], name: "index_locker_assignments_on_team_id_and_locker_id", unique: true
+  end
+
   create_table "lockers", force: :cascade do |t|
     t.integer "tenant_id", null: false
     t.string "name", null: false
@@ -18,8 +28,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_01_164306) do
     t.string "state", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["id", "tenant_id"], name: "index_lockers_on_id_and_tenant_id", unique: true
     t.index ["tenant_id"], name: "index_lockers_on_tenant_id"
     t.check_constraint "state IN ('open', 'closed')", name: "lockers_state_check"
+  end
+
+  create_table "teams", force: :cascade do |t|
+    t.integer "tenant_id", null: false
+    t.string "name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["id", "tenant_id"], name: "index_teams_on_id_and_tenant_id", unique: true
+    t.index ["tenant_id"], name: "index_teams_on_tenant_id"
   end
 
   create_table "tenants", force: :cascade do |t|
@@ -33,8 +53,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_01_164306) do
     t.string "role", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "team_id"
+    t.index ["team_id"], name: "index_users_on_team_id"
+    t.check_constraint "(role = 'employee' AND team_id IS NOT NULL) OR (role = 'support_engineer' AND team_id IS NULL)", name: "users_team_check"
     t.check_constraint "role IN ('employee', 'support_engineer')", name: "users_role_check"
   end
 
+  add_foreign_key "locker_assignments", "lockers", column: ["locker_id", "tenant_id"], primary_key: ["id", "tenant_id"]
+  add_foreign_key "locker_assignments", "teams", column: ["team_id", "tenant_id"], primary_key: ["id", "tenant_id"]
   add_foreign_key "lockers", "tenants"
+  add_foreign_key "teams", "tenants"
+  add_foreign_key "users", "teams"
 end

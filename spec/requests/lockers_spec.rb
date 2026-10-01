@@ -115,23 +115,31 @@ RSpec.describe "Lockers", type: :request do
         end
       end
 
-      it "answers 404 for another Tenant's, another Team's and an unassigned Locker" do
-        other_tenants = create(:locker_assignment).locker
-        other_teams = create(:locker_assignment, team: night).locker
-        unassigned = create(:locker, tenant: amazon)
-
-        [ other_tenants, other_teams, unassigned ].each do |locker|
-          get locker_path(locker)
-
-          expect(response).to have_http_status(:not_found)
-          expect(response.body).not_to include(locker.name)
+      context "with the error pages a real user gets" do
+        around do |example|
+          env_config = Rails.application.env_config
+          detailed = env_config["action_dispatch.show_detailed_exceptions"]
+          env_config["action_dispatch.show_detailed_exceptions"] = false
+          example.run
+        ensure
+          env_config["action_dispatch.show_detailed_exceptions"] = detailed
         end
-      end
 
-      it "answers 404 for a Locker that does not exist" do
-        get locker_path(0)
+        it "answers the same 404 for another Tenant's, another Team's, an unassigned and a missing Locker" do
+          other_tenants = create(:locker_assignment).locker
+          other_teams = create(:locker_assignment, team: night).locker
+          unassigned = create(:locker, tenant: amazon)
+          get locker_path(0)
+          expect(response).to have_http_status(:not_found)
+          missing = response.body
 
-        expect(response).to have_http_status(:not_found)
+          [ other_tenants, other_teams, unassigned ].each do |locker|
+            get locker_path(locker)
+
+            expect(response).to have_http_status(:not_found)
+            expect(response.body).to eq missing
+          end
+        end
       end
     end
 

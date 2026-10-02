@@ -12,4 +12,12 @@ RSpec.describe "Navigation", type: :request do
       assert_select "header nav a[aria-current=page]", count: 1, text: current
     end
   end
+
+  it "names the app eLocker in English" do
+    get root_path
+
+    assert_select "html[lang=en]"
+    assert_select "title", text: "eLocker"
+    assert_select "meta[name=application-name][content=eLocker]"
+  end
 end

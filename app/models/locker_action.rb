@@ -2,7 +2,7 @@ class LockerAction < ApplicationRecord
   belongs_to :locker
   belongs_to :user
 
-  enum :kind, { open: "open", close: "close" }, validate: { message: "This action is not included" }
+  enum :kind, { open: "open", close: "close" }, validate: { message: "Unknown action. Choose Open or Close." }
 
   validate :changes_locker_state, on: :create
 

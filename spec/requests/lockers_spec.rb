@@ -142,14 +142,22 @@ RSpec.describe "Lockers", type: :request do
           unassigned = create(:locker, tenant: amazon)
           get locker_path(0)
           expect(response).to have_http_status(:not_found)
-          missing = response.body
+          missing = css_select("main").to_s
 
           [ other_tenants, other_teams, unassigned ].each do |locker|
             get locker_path(locker)
 
             expect(response).to have_http_status(:not_found)
-            expect(response.body).to eq missing
+            expect(css_select("main").to_s).to eq missing
           end
+        end
+
+        it "shows the 404 inside the app, with the header and user switcher" do
+          get locker_path(0)
+
+          expect(response).to have_http_status(:not_found)
+          assert_select "header select[name=user_id]"
+          assert_select "main h1", text: "Not found"
         end
       end
     end

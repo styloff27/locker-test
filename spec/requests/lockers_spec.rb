@@ -242,7 +242,7 @@ RSpec.describe "Lockers", type: :request do
   def assert_only_action(locker, kind, label)
     assert_select "form[action=?]", locker_locker_actions_path(locker), count: 1 do
       assert_select "input[name=kind][value=?]", kind
-      assert_select "button", text: label
+      assert_select "button[aria-label=?]", "#{label} #{locker.name}", text: label
     end
   end
 end

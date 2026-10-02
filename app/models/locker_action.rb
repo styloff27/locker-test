@@ -8,6 +8,11 @@ class LockerAction < ApplicationRecord
 
   scope :newest_first, -> { order(created_at: :desc, id: :desc) }
 
+  # A Locker Action records what happened, so it never changes once recorded.
+  def readonly?
+    persisted? || super
+  end
+
   # The Locker State this Locker Action leaves its Locker in, nil for an unknown kind.
   def resulting_state
     { "open" => "open", "close" => "closed" }[kind]

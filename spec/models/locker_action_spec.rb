@@ -1,10 +1,17 @@
 require "rails_helper"
 
 RSpec.describe LockerAction do
+  it "can't be changed or destroyed once recorded" do
+    action = create(:locker_action)
+
+    expect { action.update(kind: :close) }.to raise_error(ActiveRecord::ReadOnlyRecord)
+    expect { action.destroy }.to raise_error(ActiveRecord::ReadOnlyRecord)
+  end
+
   it "rejects a kind other than open or close written past the model" do
     action = create(:locker_action)
 
-    expect { action.update_column(:kind, "unlock") }.to raise_error(ActiveRecord::StatementInvalid, /CHECK/)
+    expect { LockerAction.where(id: action).update_all(kind: "unlock") }.to raise_error(ActiveRecord::StatementInvalid, /CHECK/)
   end
 
   describe "Tenant consistency written past the model" do

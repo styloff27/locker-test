@@ -20,4 +20,10 @@ RSpec.describe "Navigation", type: :request do
     assert_select "title", text: "eLocker"
     assert_select "meta[name=application-name][content=eLocker]"
   end
+
+  it "ends each page title with the app name" do
+    get locker_actions_path
+
+    assert_select "title", text: "Action Log · eLocker"
+  end
 end

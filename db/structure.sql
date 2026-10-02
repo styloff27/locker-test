@@ -60,7 +60,13 @@ WHEN NEW.tenant_id != OLD.tenant_id
 BEGIN
   SELECT RAISE(ABORT, 'Team: the Tenant cannot change');
 END;
+CREATE TRIGGER locker_actions_readonly
+BEFORE UPDATE ON locker_actions
+BEGIN
+  SELECT RAISE(ABORT, 'Locker Action: a recorded Locker Action is read-only');
+END;
 INSERT INTO "schema_migrations" (version) VALUES
+('20261002100000'),
 ('20261002090000'),
 ('20261001194923'),
 ('20261001191651'),

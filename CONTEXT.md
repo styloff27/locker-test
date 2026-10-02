@@ -47,7 +47,7 @@ _Avoid_: Visible lockers, permitted lockers
 ## Actions
 
 **Locker Action**:
-A record that a user opened or closed a locker. It exists only when the locker's state actually changed. A request to open an already open locker is rejected and leaves no record.
+A record that a user opened or closed a locker. It exists only when the locker's state actually changed. A request to open an already open locker is rejected and leaves no record. A Locker Action never changes once recorded.
 _Avoid_: Event, operation, command
 
 **Action Log**:

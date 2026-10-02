@@ -8,10 +8,16 @@ RSpec.describe LockerAction do
     expect { action.destroy }.to raise_error(ActiveRecord::ReadOnlyRecord)
   end
 
-  it "rejects a kind other than open or close written past the model" do
+  it "can't be changed past the model, so it can't move to another Tenant's Locker" do
     action = create(:locker_action)
 
-    expect { LockerAction.where(id: action).update_all(kind: "unlock") }.to raise_error(ActiveRecord::StatementInvalid, /CHECK/)
+    expect { LockerAction.where(id: action).update_all(locker_id: create(:locker).id) }.to raise_error(ActiveRecord::StatementInvalid, /read-only/)
+  end
+
+  it "rejects a kind other than open or close written past the model" do
+    action = { locker_id: create(:locker).id, user_id: create(:user, :support_engineer).id, kind: "unlock" }
+
+    expect { LockerAction.insert_all([ action ]) }.to raise_error(ActiveRecord::StatementInvalid, /CHECK/)
   end
 
   describe "Tenant consistency written past the model" do

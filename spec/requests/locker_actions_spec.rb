@@ -220,8 +220,15 @@ RSpec.describe "Locker Actions", type: :request do
         assert_select "p", text: "No locker actions to show."
       end
 
+      it "shows the empty state for a page too large for the database" do
+        get locker_actions_path(page: "99999999999999999999")
+
+        expect(response).to have_http_status(:ok)
+        assert_select "p", text: "No locker actions to show."
+      end
+
       it "redirects a page below 1 or not a number to page 1" do
-        [ "0", "-1", "abc" ].each do |page|
+        [ "0", "-1", "abc", [ "2" ], { "a" => "2" } ].each do |page|
           get locker_actions_path(page:)
 
           expect(response).to redirect_to(locker_actions_path)

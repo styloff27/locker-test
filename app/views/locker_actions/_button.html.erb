@@ -1,2 +1,2 @@
 <% kind = locker.open? ? "close" : "open" %>
-<%= button_to kind.capitalize, locker_locker_actions_path(locker), params: { kind: } %>
+<%= button_to kind.capitalize, locker_locker_actions_path(locker), params: { kind: }, aria: { label: "#{kind.capitalize} #{locker.name}" } %>

@@ -12,6 +12,10 @@ class ApplicationController < ActionController::Base
   # A page below 1 or not a number goes to page 1. A page past the last renders empty (pagy's overflow extra).
   rescue_from(Pagy::VariableError) { redirect_to request.path }
 
+  # A record that is missing, or outside the User's access like a Locker outside Accessible Lockers, answers the
+  # same 404. It renders inside the app, as HTML for any format, so the User can switch from it.
+  rescue_from(ActiveRecord::RecordNotFound) { render "not_found", status: :not_found, formats: :html }
+
   private
 
   def accessible_lockers

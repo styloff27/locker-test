@@ -19,7 +19,7 @@
           <% if Current.user.support_engineer? %>
             <td><%= locker_action.locker.tenant.name %></td>
           <% end %>
-          <td><%= locker_action.kind.humanize %></td>
+          <td><%= locker_action.open? ? "Opened" : "Closed" %></td>
           <td><%= actor_name(locker_action) %></td>
         </tr>
       <% end %>

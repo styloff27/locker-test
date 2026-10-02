@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title><%= content_for(:title) || "Locker Platform" %></title>
+    <title><%= [ content_for(:title), "eLocker" ].compact.join(" · ") %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="Locker Platform">
+    <meta name="application-name" content="eLocker">
     <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
@@ -26,7 +26,8 @@
       <nav>
         <ul>
           <li><strong><%= link_to "eLocker", root_path %></strong></li>
-          <li><%= link_to "Action Log", locker_actions_path %></li>
+          <li><%= link_to "Lockers", root_path, aria: { current: ("page" if current_page?(root_path) || current_page?(lockers_path)) } %></li>
+          <li><%= link_to "Action Log", locker_actions_path, aria: { current: ("page" if current_page?(locker_actions_path)) } %></li>
         </ul>
         <ul>
           <li>

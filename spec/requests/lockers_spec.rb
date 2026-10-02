@@ -142,14 +142,28 @@ RSpec.describe "Lockers", type: :request do
           unassigned = create(:locker, tenant: amazon)
           get locker_path(0)
           expect(response).to have_http_status(:not_found)
-          missing = response.body
+          missing = css_select("title, main").to_s
 
           [ other_tenants, other_teams, unassigned ].each do |locker|
             get locker_path(locker)
 
             expect(response).to have_http_status(:not_found)
-            expect(response.body).to eq missing
+            expect(css_select("title, main").to_s).to eq missing
           end
+        end
+
+        it "shows the 404 inside the app, with the header and user switcher" do
+          get locker_path(0)
+
+          expect(response).to have_http_status(:not_found)
+          assert_select "header select[name=user_id]"
+          assert_select "main h1", text: "Not found"
+        end
+
+        it "answers 404, not 500, for a Locker requested in another format" do
+          get locker_path(0, format: :json)
+
+          expect(response).to have_http_status(:not_found)
         end
       end
     end
@@ -183,9 +197,9 @@ RSpec.describe "Lockers", type: :request do
         get locker_path(shared)
 
         expect(log_rows).to eq [
-          [ "October 01, 2026 12:00", "BER-1", "Close", "eLocker Support" ],
-          [ "October 01, 2026 11:00", "BER-1", "Close", "Bob" ],
-          [ "October 01, 2026 10:00", "BER-1", "Close", "Alice" ]
+          [ "October 01, 2026 12:00", "BER-1", "Closed", "eLocker Support" ],
+          [ "October 01, 2026 11:00", "BER-1", "Closed", "Bob" ],
+          [ "October 01, 2026 10:00", "BER-1", "Closed", "Alice" ]
         ]
       end
 
@@ -205,7 +219,7 @@ RSpec.describe "Lockers", type: :request do
         expect(log_rows.size).to eq 25
 
         get locker_path(shared, page: 2)
-        expect(log_rows).to eq [ [ "October 01, 2026 10:00", "BER-1", "Close", "Alice" ] ]
+        expect(log_rows).to eq [ [ "October 01, 2026 10:00", "BER-1", "Closed", "Alice" ] ]
 
         get locker_path(shared, page: 0)
         expect(response).to redirect_to(locker_path(shared))
@@ -234,7 +248,7 @@ RSpec.describe "Lockers", type: :request do
   def assert_only_action(locker, kind, label)
     assert_select "form[action=?]", locker_locker_actions_path(locker), count: 1 do
       assert_select "input[name=kind][value=?]", kind
-      assert_select "button", text: label
+      assert_select "button[aria-label=?]", "#{label} #{locker.name}", text: label
     end
   end
 end

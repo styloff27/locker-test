@@ -142,13 +142,13 @@ RSpec.describe "Lockers", type: :request do
           unassigned = create(:locker, tenant: amazon)
           get locker_path(0)
           expect(response).to have_http_status(:not_found)
-          missing = css_select("main").to_s
+          missing = css_select("title, main").to_s
 
           [ other_tenants, other_teams, unassigned ].each do |locker|
             get locker_path(locker)
 
             expect(response).to have_http_status(:not_found)
-            expect(css_select("main").to_s).to eq missing
+            expect(css_select("title, main").to_s).to eq missing
           end
         end
 
@@ -158,6 +158,12 @@ RSpec.describe "Lockers", type: :request do
           expect(response).to have_http_status(:not_found)
           assert_select "header select[name=user_id]"
           assert_select "main h1", text: "Not found"
+        end
+
+        it "answers 404, not 500, for a Locker requested in another format" do
+          get locker_path(0, format: :json)
+
+          expect(response).to have_http_status(:not_found)
         end
       end
     end

@@ -191,9 +191,9 @@ RSpec.describe "Lockers", type: :request do
         get locker_path(shared)
 
         expect(log_rows).to eq [
-          [ "October 01, 2026 12:00", "BER-1", "Close", "eLocker Support" ],
-          [ "October 01, 2026 11:00", "BER-1", "Close", "Bob" ],
-          [ "October 01, 2026 10:00", "BER-1", "Close", "Alice" ]
+          [ "October 01, 2026 12:00", "BER-1", "Closed", "eLocker Support" ],
+          [ "October 01, 2026 11:00", "BER-1", "Closed", "Bob" ],
+          [ "October 01, 2026 10:00", "BER-1", "Closed", "Alice" ]
         ]
       end
 
@@ -213,7 +213,7 @@ RSpec.describe "Lockers", type: :request do
         expect(log_rows.size).to eq 25
 
         get locker_path(shared, page: 2)
-        expect(log_rows).to eq [ [ "October 01, 2026 10:00", "BER-1", "Close", "Alice" ] ]
+        expect(log_rows).to eq [ [ "October 01, 2026 10:00", "BER-1", "Closed", "Alice" ] ]
 
         get locker_path(shared, page: 0)
         expect(response).to redirect_to(locker_path(shared))

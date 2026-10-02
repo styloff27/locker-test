@@ -141,9 +141,9 @@ RSpec.describe "Locker Actions", type: :request do
 
         expect(response).to have_http_status(:ok)
         expect(log_rows).to eq [
-          [ "October 01, 2026 12:00", "BER-1", "Close", "eLocker Support" ],
-          [ "October 01, 2026 11:00", "BER-1", "Close", "Bob" ],
-          [ "October 01, 2026 10:00", "BER-2", "Open", "Alice" ]
+          [ "October 01, 2026 12:00", "BER-1", "Closed", "eLocker Support" ],
+          [ "October 01, 2026 11:00", "BER-1", "Closed", "Bob" ],
+          [ "October 01, 2026 10:00", "BER-2", "Opened", "Alice" ]
         ]
         assert_select "th", text: "Tenant", count: 0
       end
@@ -155,12 +155,12 @@ RSpec.describe "Locker Actions", type: :request do
 
         assert_select "th", text: "Tenant"
         expect(log_rows).to eq [
-          [ "October 01, 2026 14:00", "HAM-1", "DPD", "Open", "Dave" ],
-          [ "October 01, 2026 13:00", "BER-3", "Amazon", "Open", "Bob" ],
-          [ "October 01, 2026 12:00", "BER-1", "Amazon", "Close", "Sam" ],
-          [ "October 01, 2026 11:00", "BER-1", "Amazon", "Close", "Bob" ],
-          [ "October 01, 2026 10:00", "BER-2", "Amazon", "Open", "Alice" ],
-          [ "October 01, 2026 09:00", "BER-4", "Amazon", "Open", "Sam" ]
+          [ "October 01, 2026 14:00", "HAM-1", "DPD", "Opened", "Dave" ],
+          [ "October 01, 2026 13:00", "BER-3", "Amazon", "Opened", "Bob" ],
+          [ "October 01, 2026 12:00", "BER-1", "Amazon", "Closed", "Sam" ],
+          [ "October 01, 2026 11:00", "BER-1", "Amazon", "Closed", "Bob" ],
+          [ "October 01, 2026 10:00", "BER-2", "Amazon", "Opened", "Alice" ],
+          [ "October 01, 2026 09:00", "BER-4", "Amazon", "Opened", "Sam" ]
         ]
       end
 

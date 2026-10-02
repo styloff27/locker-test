@@ -174,6 +174,15 @@ RSpec.describe "Locker Actions", type: :request do
       end
     end
 
+    it "shows times in Berlin time, where the Lockers are" do
+      create(:locker_action, locker: mornings, user: alice, created_at: Time.utc(2026, 10, 1, 10))
+      switch_to alice
+
+      get locker_actions_path
+
+      expect(log_rows.first.first).to eq "October 01, 2026 12:00"
+    end
+
     it "drops a Locker's history when the Employee loses access to it, even their own Locker Actions" do
       act(mornings, alice, "open", 10)
       LockerAssignment.find_by!(team: morning, locker: mornings).destroy!

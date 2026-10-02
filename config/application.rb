@@ -33,7 +33,9 @@ module LockerPlatform
     # These settings can be overridden in specific environments using the files
     # in config/environments, which are processed later.
     #
-    # config.time_zone = "Central Time (US & Canada)"
+    # The Lockers are in Germany, so times show in Berlin time.
+    # ponytail: one zone for every Locker; store a zone per Locker once Lockers exist outside Germany.
+    config.time_zone = "Berlin"
     # config.eager_load_paths << Rails.root.join("extras")
 
     # db/structure.sql, because schema.rb can't hold the Tenant-consistency trigger on locker_actions (ADR 0002).

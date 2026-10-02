@@ -64,6 +64,17 @@ RSpec.describe "Locker Actions", type: :request do
       end
     end
 
+    [ {}, { kind: [ "open" ] }, { kind: { open: "1" } } ].each do |params|
+      it "answers 400 to a missing or malformed kind (#{params}) and changes nothing" do
+        expect {
+          post locker_locker_actions_path(locker), params:
+        }.not_to change(LockerAction, :count)
+
+        expect(response).to have_http_status(:bad_request)
+        expect(locker.reload).to be_closed
+      end
+    end
+
     it "answers 404 to an Employee for another Tenant's, another Team's and an unassigned Locker, and changes nothing" do
       other_tenants = create(:locker_assignment).locker
       other_teams = create(:locker_assignment, team: create(:team, tenant: team.tenant)).locker

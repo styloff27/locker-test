@@ -2,11 +2,16 @@ class LockerAction < ApplicationRecord
   belongs_to :locker
   belongs_to :user
 
-  enum :kind, { open: "open", close: "close" }, validate: { message: "This action is not included" }
+  enum :kind, { open: "open", close: "close" }, validate: { message: "Unknown action. Choose Open or Close." }
 
   validate :changes_locker_state, on: :create
 
   scope :newest_first, -> { order(created_at: :desc, id: :desc) }
+
+  # A Locker Action records what happened, so it never changes once recorded.
+  def readonly?
+    persisted? || super
+  end
 
   # The Locker State this Locker Action leaves its Locker in, nil for an unknown kind.
   def resulting_state

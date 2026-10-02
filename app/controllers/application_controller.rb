@@ -18,6 +18,13 @@ class ApplicationController < ActionController::Base
     Locker.accessible_by(Current.user)
   end
 
+  # Reads the page param with to_i like pagy does, 1 when missing. An array or hash becomes 0, which goes to page 1
+  # above. A page past 1,000,000 reads as 1,000,000 so the offset fits SQLite's integer.
+  # ponytail: a page past 1,000,000 (25M Locker Actions) shows page 1,000,000; raise the cap if a log ever grows that far.
+  def pagy_get_page(*)
+    [ (params[:page] || 1).to_s.to_i, 1_000_000 ].min
+  end
+
   def set_current_user
     Current.user = User.find_by(id: session[:user_id]) || User.first
   end

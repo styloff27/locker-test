@@ -39,17 +39,17 @@ end
   end
 end
 
-# Locker Actions, oldest first, one hour apart. Each Locker's kinds alternate and end in its Locker State above.
-# Inserted directly because the open/close check compares against the Locker's current, final State.
+# Locker Actions, oldest first, one hour apart. Each Locker's last Locker Action matches its Locker State above.
+# Inserted directly, because Locker#operate would check each kind against the Locker's final State.
 LockerAction.delete_all
 history = [
-  [ "BER-1", "Alice" ], [ "HAM-1", "Dave" ], [ "BER-2", "Alice" ], [ "BER-1", "Bob" ], [ "MUC-1", "Carol" ],
-  [ "HAM-3", "Sam" ], [ "CGN-1", "Erin" ], [ "BER-3", "Bob" ], [ "HAM-2", "Dave" ], [ "BER-1", "Sam" ],
-  [ "HAM-1", "Kim" ], [ "BER-2", "Alice" ], [ "CGN-1", "Erin" ], [ "HAM-3", "Kim" ], [ "BER-1", "Alice" ]
+  [ "BER-1", "Alice", "close" ], [ "HAM-1", "Dave", "open" ], [ "BER-2", "Alice", "open" ],
+  [ "BER-1", "Bob", "open" ], [ "MUC-1", "Carol", "open" ], [ "HAM-3", "Sam", "open" ],
+  [ "CGN-1", "Erin", "open" ], [ "BER-3", "Bob", "close" ], [ "HAM-2", "Dave", "open" ],
+  [ "BER-1", "Sam", "close" ], [ "HAM-1", "Kim", "close" ], [ "BER-2", "Alice", "close" ],
+  [ "CGN-1", "Erin", "close" ], [ "HAM-3", "Kim", "close" ], [ "BER-1", "Alice", "open" ]
 ]
-history.each_with_index do |(locker_name, user_name), index|
+history.each_with_index do |(locker_name, user_name, kind), index|
   locker = Locker.find_by!(name: locker_name)
-  later = history.drop(index + 1).count { |name, _| name == locker_name }
-  kind = locker.open? == later.even? ? "open" : "close"
   LockerAction.insert!({ locker_id: locker.id, user_id: users.fetch(user_name).id, kind:, created_at: (history.size - index).hours.ago })
 end

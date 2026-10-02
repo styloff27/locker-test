@@ -36,7 +36,7 @@ The Locker ids below assume a freshly reset database (`bin/rails db:reset`): BER
 
 1. **An Employee's scoping.** Switch to Alice. The Lockers list shows only BER-1 and BER-2, without a Tenant column. The Action Log shows only actions on those two Lockers.
 2. **A shared Locker.** Switch to Bob. He sees BER-1 and BER-3, but not BER-2. In his Action Log, he sees Alice's actions on BER-1, because their Teams share it, but none of her actions on BER-2. The BER-1 page lists both Teams.
-3. **A 404 by URL guessing.** As Alice, open http://localhost:3000/lockers/5 (HAM-1, DPD's), then /lockers/3 (BER-3, Bob's Team's) and /lockers/999 (missing). All three answer the same 404. Development mode renders Rails' debug page for `ActiveRecord::RecordNotFound`, but the status is 404. An open or close request for another Team's Locker also answers 404 and changes nothing. To try it, use the browser's developer tools to change a button's form `action` from `/lockers/1/locker_actions` to `/lockers/5/locker_actions`, then click it. A plain `curl` request gets a 422 from CSRF protection before the access check runs.
+3. **A 404 by URL guessing.** As Alice, open http://localhost:3000/lockers/5 (HAM-1, DPD's), then /lockers/3 (BER-3, Bob's Team's) and /lockers/999 (missing). All three answer the same 404. An open or close request for another Team's Locker also answers 404 and changes nothing. To try it, use the browser's developer tools to change a button's form `action` from `/lockers/1/locker_actions` to `/lockers/5/locker_actions`, then click it.
 4. **A Support Engineer's full view.** Switch to Sam. The Lockers list shows all 8 Lockers with a Tenant column, and Sam can open and close any of them. The Action Log shows all 15 seeded actions with Tenants and real names.
 5. **The unassigned Locker.** HAM-3 belongs to DPD but has no Locker Assignment. Sam and Kim see it and its history. Dave, a DPD Employee, doesn't: /lockers/7 answers 404 for him.
 6. **Open/close rejection.** As Alice, open the Lockers list in two tabs. Close BER-1 in the first tab. Then click the stale **Close** button in the second tab. The request is rejected with "BER-1 is already closed.", and no Locker Action is recorded.
@@ -60,14 +60,14 @@ erDiagram
 - **User**: has a `role`, either `employee` or `support_engineer`. An Employee belongs to exactly one Team. A Support Engineer belongs to no Team. A model validation and a database CHECK constraint both enforce this.
 - **Locker**: a single door, owned by one Tenant. Its `state` is `open` or `closed` (also a CHECK constraint).
 - **Locker Assignment**: the join between a Team and a Locker of the same Tenant.
-- **Locker Action**: a record that a User opened or closed a Locker, and when. The app never edits or deletes it. It exists only if the Locker State actually changed.
+- **Locker Action**: a record that a User opened or closed a Locker, and when. It is read-only once recorded, in the model and the database. It exists only if the Locker State actually changed.
 
 ### Why it looks like this
 
 - **Locker Assignments are many-to-many.** The brief says that each Team works with "its own set" of Lockers. Teams such as a morning and a night shift naturally share the same physical Locker. A `team_id` on `lockers` would rule that out, so a join table it is. The seeds show it with BER-1.
 - **Users have no Tenant reference.** An Employee's Tenant is a property of their Team. Storing it on the User as well would create a second source of truth that could drift. A Support Engineer has no Tenant at all, because eLocker is not a Tenant. See [ADR 0001](docs/adr/0001-tenant-consistency-via-composite-foreign-keys.md).
 - **The brief's "company" is called "Tenant".** It is the unit of data separation, and the name says so. "Company" is ambiguous here, because eLocker is a company too but is not a Tenant. The glossary in [CONTEXT.md](CONTEXT.md) lists the terms to use and to avoid.
-- **The database guarantees tenant consistency, not just the models.** A Locker Assignment carries a deliberately duplicated `tenant_id`. Composite foreign keys on it make it impossible to assign one Tenant's Locker to another Tenant's Team, even through raw SQL or the console ([ADR 0001](docs/adr/0001-tenant-consistency-via-composite-foreign-keys.md)). A trigger rejects a Locker Action by an Employee on another Tenant's Locker ([ADR 0002](docs/adr/0002-tenant-consistency-of-locker-actions-via-trigger.md)). Because of the trigger, the schema is dumped as `db/structure.sql`.
+- **The database guarantees tenant consistency, not just the models.** A Locker Assignment carries a deliberately duplicated `tenant_id`. Composite foreign keys on it make it impossible to assign one Tenant's Locker to another Tenant's Team, even through raw SQL or the console ([ADR 0001](docs/adr/0001-tenant-consistency-via-composite-foreign-keys.md)). A trigger rejects a Locker Action by an Employee on another Tenant's Locker ([ADR 0002](docs/adr/0002-tenant-consistency-of-locker-actions-via-trigger.md)). A Locker or Team never changes Tenant, and a recorded Locker Action never changes, so history can't move to another Tenant ([ADR 0003](docs/adr/0003-a-locker-or-team-never-changes-tenant.md)). Because of the triggers, the schema is dumped as `db/structure.sql`.
 - **Opening or closing creates a Locker Action.** `POST /lockers/:locker_id/locker_actions` with `kind=open|close` is the only write endpoint. `Locker#operate` checks the State, creates the Locker Action and changes the State in one transaction under `with_lock`, which on SQLite takes the database write lock. Two simultaneous requests therefore produce at most one change.
 
 ## Access design
@@ -92,6 +92,7 @@ erDiagram
 - Should Employees see **which Support Engineer** acted, or is "eLocker Support" right?
 - Do **contractors work across Tenants**, or across several Teams? Today a User has one Team. Multiple memberships would turn that reference into a join table.
 - Should a Team keep the **history of a Locker after losing its Locker Assignment**? Today it doesn't.
+- Can a Locker **pass to another Tenant**, for example when it is resold? Its history travels with the Locker, so the new Tenant would see the old Tenant's Locker Actions. The app therefore never moves a Locker or Team to another Tenant ([ADR 0003](docs/adr/0003-a-locker-or-team-never-changes-tenant.md)): a transfer means creating a new Locker. If transfers are real, each Locker Action would have to record its Tenant, and history would be filtered by it.
 
 ## Next steps
 

@@ -48,7 +48,26 @@ BEGIN
   SELECT RAISE(ABORT, 'Locker Action: the Locker and the Employee belong to different tenants');
 END;
 CREATE INDEX "index_locker_actions_on_locker_id_and_created_at_and_id" ON "locker_actions" ("locker_id", "created_at", "id") /*application='LockerPlatform'*/;
+CREATE TRIGGER lockers_tenant_readonly
+BEFORE UPDATE OF tenant_id ON lockers
+WHEN NEW.tenant_id != OLD.tenant_id
+BEGIN
+  SELECT RAISE(ABORT, 'Locker: the Tenant cannot change');
+END;
+CREATE TRIGGER teams_tenant_readonly
+BEFORE UPDATE OF tenant_id ON teams
+WHEN NEW.tenant_id != OLD.tenant_id
+BEGIN
+  SELECT RAISE(ABORT, 'Team: the Tenant cannot change');
+END;
+CREATE TRIGGER locker_actions_readonly
+BEFORE UPDATE ON locker_actions
+BEGIN
+  SELECT RAISE(ABORT, 'Locker Action: a recorded Locker Action is read-only');
+END;
 INSERT INTO "schema_migrations" (version) VALUES
+('20261002100000'),
+('20261002090000'),
 ('20261001194923'),
 ('20261001191651'),
 ('20261001185042'),

@@ -92,6 +92,7 @@ erDiagram
 - Should Employees see **which Support Engineer** acted, or is "eLocker Support" right?
 - Do **contractors work across Tenants**, or across several Teams? Today a User has one Team. Multiple memberships would turn that reference into a join table.
 - Should a Team keep the **history of a Locker after losing its Locker Assignment**? Today it doesn't.
+- Can a Locker **pass to another Tenant**, for example when it is resold? Its history travels with the Locker, so the new Tenant would see the old Tenant's Locker Actions. The app therefore never moves a Locker or Team to another Tenant ([ADR 0003](docs/adr/0003-a-locker-or-team-never-changes-tenant.md)): a transfer means creating a new Locker. If transfers are real, each Locker Action would have to record its Tenant, and history would be filtered by it.
 
 ## Next steps
 

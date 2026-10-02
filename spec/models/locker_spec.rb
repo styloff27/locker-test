@@ -14,6 +14,18 @@ RSpec.describe Locker do
     expect { locker.update_column(:state, "maintenance") }.to raise_error(ActiveRecord::StatementInvalid, /CHECK/)
   end
 
+  it "rejects a move to another Tenant" do
+    locker = create(:locker)
+
+    expect { locker.tenant = create(:tenant) }.to raise_error(ActiveRecord::ReadonlyAttributeError)
+  end
+
+  it "rejects a move to another Tenant written past the model" do
+    locker = create(:locker)
+
+    expect { Locker.where(id: locker).update_all(tenant_id: create(:tenant).id) }.to raise_error(ActiveRecord::StatementInvalid, /Tenant/)
+  end
+
   it "rejects an open through a stale Locker, because the lock re-reads the Locker State" do
     locker = create(:locker, state: :closed)
     user = create(:user, :support_engineer)

@@ -1,5 +1,6 @@
 class Locker < ApplicationRecord
   belongs_to :tenant
+  attr_readonly :tenant_id
   has_many :locker_assignments
   has_many :teams, through: :locker_assignments
   has_many :locker_actions
